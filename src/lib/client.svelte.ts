@@ -400,8 +400,14 @@ export function useQuery<Query extends FunctionReference<'query'>>(
 		} as UseQueryReturn<Query>;
 	}
 
-	// Browser-only cached behavior
-	const localState = $state({ updateTrigger: 0 });
+	// Browser-only cached behavior - FIXED VERSION
+	// Use simple $state instead of complex $derived chains to avoid reactivity cycles
+	const localState = $state({
+		data: undefined as FunctionReturnType<Query> | undefined,
+		error: undefined as Error | undefined,
+		isLoading: true,
+		isStale: false
+	});
 	
 	let currentSubscription: (() => void) | null = null;
 	let currentEntry: QueryCacheEntry<Query> | null = null;
@@ -421,14 +427,17 @@ export function useQuery<Query extends FunctionReference<'query'>>(
 			query,
 			argsObject,
 			() => {
-				// Trigger reactivity when data changes
-				localState.updateTrigger++;
+				// Update local state directly when cache changes
+				updateLocalStateFromEntry(entry, argsObject, optionsObject);
 			},
 			optionsObject
 		);
 
 		currentEntry = entry;
 		currentSubscription = unsubscribe;
+		
+		// Set initial state from entry
+		updateLocalStateFromEntry(entry, argsObject, optionsObject);
 		
 		return () => {
 			if (currentSubscription) {
@@ -437,84 +446,107 @@ export function useQuery<Query extends FunctionReference<'query'>>(
 		};
 	});
 
-	// Handle keepPreviousData logic
-	const result = $derived.by(() => {
-		// Trigger reactive dependency
-		localState.updateTrigger;
-		
-		if (!currentEntry) return undefined;
-
-		const argsObject = parseArgs(args);
-		const optionsObject = parseOptions(options);
-		
+	// Helper function to update local state from cache entry
+	function updateLocalStateFromEntry(
+		entry: QueryCacheEntry<Query>, 
+		argsObject: FunctionArgs<Query>, 
+		optionsObject: UseQueryOptions<Query>
+	) {
 		// Check if we should use stale data
 		const sameArgsAsLastResult = !!(
-			currentEntry.argsForLastResult &&
-			JSON.stringify(convexToJson(currentEntry.argsForLastResult)) ===
+			entry.argsForLastResult &&
+			JSON.stringify(convexToJson(entry.argsForLastResult)) ===
 			JSON.stringify(convexToJson(argsObject))
 		);
 
-		const staleAllowed = !!(optionsObject.keepPreviousData && currentEntry.lastResult);
+		const staleAllowed = !!(optionsObject.keepPreviousData && entry.lastResult);
 		
-		if (currentEntry.data !== undefined || currentEntry.error !== undefined) {
-			return currentEntry.error || currentEntry.data;
-		}
-		
-		if (staleAllowed && !sameArgsAsLastResult && currentEntry.lastResult !== undefined) {
-			return currentEntry.lastResult;
-		}
+		// Determine data to show
+		let dataToShow: FunctionReturnType<Query> | undefined = undefined;
+		let errorToShow: Error | undefined = undefined;
+		let isLoadingToShow = true;
+		let isStaleToShow = false;
 
-		// Try to get sync result for immediate data
-		try {
-			const syncResult = client.disabled
-				? undefined
-				: client.client.localQueryResult(getFunctionName(query), argsObject);
-			
-			if (syncResult !== undefined) {
-				return syncResult;
+		// Priority 1: Current data from cache
+		if (entry.data !== undefined) {
+			dataToShow = entry.data;
+			errorToShow = undefined;
+			isLoadingToShow = false;
+			isStaleToShow = entry.isStale;
+		}
+		// Priority 2: Current error from cache
+		else if (entry.error !== undefined) {
+			dataToShow = undefined;
+			errorToShow = entry.error;
+			isLoadingToShow = false;
+			isStaleToShow = entry.isStale;
+		}
+		// Priority 3: Stale data if allowed
+		else if (staleAllowed && !sameArgsAsLastResult && entry.lastResult !== undefined && !(entry.lastResult instanceof Error)) {
+			dataToShow = entry.lastResult;
+			errorToShow = undefined;
+			isLoadingToShow = false;
+			isStaleToShow = true;
+		}
+		// Priority 4: Try sync result for immediate data
+		else {
+			try {
+				const syncResult = client.disabled
+					? undefined
+					: client.client.localQueryResult(getFunctionName(query), argsObject);
+				
+				if (syncResult !== undefined && !(syncResult instanceof Error)) {
+					dataToShow = syncResult;
+					errorToShow = undefined;
+					isLoadingToShow = false;
+					isStaleToShow = false;
+				} else if (syncResult instanceof Error) {
+					dataToShow = undefined;
+					errorToShow = syncResult;
+					isLoadingToShow = false;
+					isStaleToShow = false;
+				} else {
+					// Still loading
+					dataToShow = undefined;
+					errorToShow = undefined;
+					isLoadingToShow = true;
+					isStaleToShow = false;
+				}
+			} catch (e) {
+				if (e instanceof Error) {
+					dataToShow = undefined;
+					errorToShow = e;
+					isLoadingToShow = false;
+					isStaleToShow = false;
+				} else {
+					// Still loading
+					dataToShow = undefined;
+					errorToShow = undefined;
+					isLoadingToShow = true;
+					isStaleToShow = false;
+				}
 			}
-		} catch (e) {
-			if (e instanceof Error) {
-				return e;
-			}
 		}
 
-		return undefined;
-	});
-
-	const data = $derived.by(() => {
-		if (result instanceof Error) {
-			return undefined;
-		}
-		return result;
-	});
-
-	const error = $derived.by(() => {
-		if (result instanceof Error) {
-			return result;
-		}
-		return undefined;
-	});
-
-	const isLoading = $derived(error === undefined && data === undefined);
-	
-	const isStale = $derived.by(() => {
-		localState.updateTrigger; // Reactive dependency
-		return currentEntry?.isStale || false;
-	});
+		// Update local state
+		localState.data = dataToShow;
+		localState.error = errorToShow;
+		localState.isLoading = isLoadingToShow;
+		localState.isStale = isStaleToShow;
+	}
 
 	return {
 		get data() {
-			return data;
+			return localState.data;
 		},
 		get isLoading() {
-			return isLoading;
+			return localState.isLoading;
 		},
 		get error() {
-			return error;
+			return localState.error;
 		},
 		get isStale() {
-			return isStale;
+			return localState.isStale;
 		}
 	} as UseQueryReturn<Query>;
 }
