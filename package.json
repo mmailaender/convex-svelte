@@ -43,8 +43,8 @@
 		}
 	},
 	"peerDependencies": {
-		"convex": "^1.10.0",
-		"svelte": "^5.0.0"
+		"convex": "^1.24.6",
+		"svelte": "^5.33.14"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.45.3",
@@ -54,7 +54,7 @@
 		"@sveltejs/vite-plugin-svelte": "^4.0.4",
 		"@types/eslint": "^9.6.0",
 		"@types/node": "^22.10.7",
-		"convex": "^1.18.0",
+		"convex": "^1.24.6",
 		"eslint": "^9.7.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
@@ -63,11 +63,11 @@
 		"prettier": "^3.3.2",
 		"prettier-plugin-svelte": "^3.2.6",
 		"publint": "^0.2.0",
-		"svelte": "^5.0.0",
+		"svelte": "^5.33.14",
 		"svelte-check": "^4.0.0",
-		"typescript": "^5.0.0",
-		"typescript-eslint": "^8.0.0",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.33.1",
 		"vite": "^5.0.11",
-		"vitest": "^2.0.4"
+		"vitest": "^3.2.0"
 	}
 }
