@@ -8,7 +8,7 @@
 	const result = useQuery(
 		api.messages.list,
 		() => ({ muteWords: [] }),
-		() => ({ async: true as const, initialData: data.messages })
+		() => ({ initialData: data.messages })
 	);
 </script>
 
@@ -29,11 +29,11 @@
 			<button onclick={reset} data-testid="reset-btn">Retry</button>
 		{/snippet}
 
-		{@const res = await result}
+		{@const msgs = await result}
 
 		<div data-testid="query-state">
-			{#if res.data}
-				<p data-testid="data">Data: {res.data.length} messages</p>
+			{#if msgs}
+				<p data-testid="data">Data: {msgs.length} messages</p>
 			{:else}
 				<p data-testid="no-data">No data</p>
 			{/if}

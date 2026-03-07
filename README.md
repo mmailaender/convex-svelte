@@ -106,7 +106,7 @@ Use `useQuery()` to subscribe to a Convex query with automatic real-time updates
 {/if}
 ```
 
-The returned object is reactive and has the following shape:
+The returned object is reactive and also a `PromiseLike` — you can read properties directly for inline control, or `await` it inside a `<svelte:boundary>` for declarative loading/error states (see [Async Queries](#async-queries)).
 
 | Property    | Type                 | Description                                                |
 | ----------- | -------------------- | ---------------------------------------------------------- |
@@ -114,6 +114,7 @@ The returned object is reactive and has the following shape:
 | `error`     | `Error \| undefined` | The error, if the query failed                             |
 | `isLoading` | `boolean`            | `true` until the first result or error is received         |
 | `isStale`   | `boolean`            | `true` when displaying cached data from previous arguments |
+| `then()`    | `PromiseLike`        | Resolves to `T` on first data; rejects on first error      |
 
 #### Options
 
@@ -344,7 +345,7 @@ You can also skip a paginated query by returning `'skip'` from the arguments fun
 
 ### Async Queries (experimental)
 
-Pass `{ async: true }` to `useQuery()` to return a `PromiseLike` that works with Svelte's `await` keyword and `<svelte:boundary>` for declarative loading and error states.
+Since `useQuery()` returns a `PromiseLike`, you can `await` it inside a `<svelte:boundary>` for declarative loading and error states — no extra options needed.
 
 > **Note**: This requires Svelte's experimental async support. Add the following to your `svelte.config.js`:
 >
@@ -361,8 +362,8 @@ Pass `{ async: true }` to `useQuery()` to return a `PromiseLike` that works with
 	import { useQuery } from '@mmailaender/convex-svelte';
 	import { api } from '../convex/_generated/api.js';
 
-	const messages = useQuery(api.messages.list, () => ({ muteWords: [] }), { async: true });
-	const user = useQuery(api.users.getActive, {}, { async: true });
+	const messages = useQuery(api.messages.list, () => ({ muteWords: [] }));
+	const user = useQuery(api.users.getActive, {});
 </script>
 
 <svelte:boundary>
@@ -378,9 +379,9 @@ Pass `{ async: true }` to `useQuery()` to return a `PromiseLike` that works with
 	{@const msgs = await messages}
 	{@const me = await user}
 
-	<h2>Welcome, {me.data.name}!</h2>
+	<h2>Welcome, {me.name}!</h2>
 	<ul>
-		{#each msgs.data as message}
+		{#each msgs as message}
 			<li>{message.author}: {message.body}</li>
 		{/each}
 	</ul>
@@ -389,30 +390,32 @@ Pass `{ async: true }` to `useQuery()` to return a `PromiseLike` that works with
 
 The `<svelte:boundary>` handles both loading and error states declaratively — no `{#if isLoading}` / `{:else if error}` / `{:else}` chains. Multiple queries can share a single boundary, so the `pending` snippet shows until **all** queries resolve.
 
-**Error handling**: The boundary fully covers errors — both during the initial load (promise rejects → `failed` snippet) and after data has arrived (e.g. auth expiry, network issues). The `data` getter throws errors so the boundary catches them as rendering errors automatically. Clicking the `Retry` button re-renders the content, picking up recovered data if the subscription has reconnected.
+When `await`ed, the promise resolves to the raw data (`T`), not a wrapper object. The reactive getters (`.data`, `.error`, `.isLoading`, `.isStale`) remain available on the original query object.
+
+**Error handling**: The boundary fully covers errors — during the initial load the promise rejects → `failed` snippet shows. Clicking the `Retry` button re-renders the content, picking up recovered data if the subscription has reconnected.
 
 **Loading states**: The boundary's `pending` snippet covers the initial load. For subsequent loading after reactive arg changes, the boundary does **not** re-enter `pending` (this is Svelte's design). Use `keepPreviousData: true` to display stale data during transitions, with `isStale` as a visual indicator:
 
 ```svelte
-{@const result = await messages}
+{@const _ = await messages}
 
-{#if result.isStale}
+{#if messages.isStale}
 	<p>Updating...</p>
 {/if}
 
 <ul>
-	{#each result.data as message}
+	{#each messages.data as message}
 		<li>{message.author}: {message.body}</li>
 	{/each}
 </ul>
 ```
 
-#### When to use async vs sync
+#### When to use async vs reactive
 
-- **Use `useQuery()` (default sync)** when you want inline control over loading/error states, or need to render partial UI while data loads.
-- **Use `useQuery()` with `{ async: true }`** when you want boundary-based loading/error handling with less markup. This shines when grouping multiple queries under a single boundary. With Svelte 6's async renderer, this will also enable SSR without `+page.server.ts` boilerplate.
+- **Reactive properties** (`messages.data`, `messages.isLoading`) — inline control over loading/error states, render partial UI while data loads.
+- **`await` with `<svelte:boundary>`** — boundary-based loading/error handling with less markup. Shines when grouping multiple queries under a single boundary. With Svelte 6's async renderer, this will also enable SSR without `+page.server.ts` boilerplate.
 
-All options (`initialData`, `keepPreviousData`, `skip`) work in both modes.
+Both modes work from the same `useQuery()` call — no options needed to switch. All options (`initialData`, `keepPreviousData`, `skip`) work in both modes.
 
 ### Authentication
 
@@ -807,11 +810,11 @@ Import from `@mmailaender/convex-svelte`:
 | `useConvexClient()`                       | Function | Retrieve the `ConvexClient` from Svelte context. Must be called during component initialization.                 |
 | `getConvexClient()`                       | Function | Retrieve the `ConvexClient` module singleton. Works anywhere — no Svelte context needed.                         |
 | `useQuery(query, args, options?)`         | Function | Subscribe to a Convex query with reactive updates. Returns `UseQueryReturn`.                                     |
-| `UseQueryOptions<Query>`                  | Type     | Options for `useQuery`: `initialData`, `keepPreviousData`, `async`.                                              |
-| `UseQueryReturn<Query>`                   | Type     | Return type of `useQuery`: `data`, `error`, `isLoading`, `isStale`.                                             |
+| `UseQueryOptions<Query>`                  | Type     | Options for `useQuery`: `initialData`, `keepPreviousData`.                                                       |
+| `UseQueryReturn<Query>`                   | Type     | Return type of `useQuery`: `PromiseLike<T>` with reactive `data`, `error`, `isLoading`, `isStale`.               |
 | `usePaginatedQuery(query, args, options)` | Function | Subscribe to a paginated Convex query with cursor management. Returns `UsePaginatedQueryReturn`.                 |
 | `UsePaginatedQueryOptions<Query>`         | Type     | Options for `usePaginatedQuery`: `initialNumItems`, `initialData`, `keepPreviousData`.                           |
-| `UsePaginatedQueryReturn<Query>`          | Type     | Return type of `usePaginatedQuery`: `results`, `status`, `isLoading`, `loadMore`, `error`.                      |
+| `UsePaginatedQueryReturn<Query>`          | Type     | Return type of `usePaginatedQuery`: `results`, `status`, `isLoading`, `loadMore`, `error`.                       |
 | `setupAuth(provider, options?)`           | Function | Set up reactive authentication. Manages `setAuth`/`clearAuth` automatically.                                     |
 | `ConvexAuthProvider`                      | Type     | Auth provider state: `isLoading`, `isAuthenticated`, `fetchAccessToken`.                                         |
 | `SetupAuthOptions`                        | Type     | Options for `setupAuth`: `initialState` for SSR hydration.                                                       |

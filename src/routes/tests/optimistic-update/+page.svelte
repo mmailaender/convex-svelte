@@ -46,6 +46,6 @@
 {:else if numbers.error}
 	<p data-testid="error">{numbers.error.message}</p>
 {:else}
-	<p data-testid="data">a={numbers.data.a} b={numbers.data.b} c={numbers.data.c}</p>
-	<p data-testid="value-a">valueA: {numbers.data.a}</p>
+	<p data-testid="data">a={numbers.data!.a} b={numbers.data!.b} c={numbers.data!.c}</p>
+	<p data-testid="value-a">valueA: {numbers.data!.a}</p>
 {/if}

@@ -43,5 +43,5 @@
 {:else if messages.error}
 	<p data-testid="error">{messages.error.message}</p>
 {:else}
-	<p data-testid="data">Loaded {messages.data.length} messages</p>
+	<p data-testid="data">Loaded {messages.data!.length} messages</p>
 {/if}

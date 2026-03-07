@@ -4,9 +4,7 @@
 
 	let skipQuery = $state(false);
 
-	const result = useQuery(api.messages.list, () => (skipQuery ? 'skip' : { muteWords: [] }), {
-		async: true
-	});
+	const result = useQuery(api.messages.list, () => (skipQuery ? 'skip' : { muteWords: [] }));
 </script>
 
 <section>
@@ -27,15 +25,15 @@
 			<button onclick={reset} data-testid="reset-btn">Retry</button>
 		{/snippet}
 
-		{@const res = await result}
+		{@const msgs = await result}
 
 		<div data-testid="query-state">
-			{#if res.data}
-				<p data-testid="data">Data: {res.data.length} messages</p>
+			{#if msgs}
+				<p data-testid="data">Data: {msgs.length} messages</p>
 			{:else}
 				<p data-testid="no-data">No data</p>
 			{/if}
-			{#if res.isStale}
+			{#if result.isStale}
 				<p data-testid="is-stale">Stale data</p>
 			{/if}
 		</div>

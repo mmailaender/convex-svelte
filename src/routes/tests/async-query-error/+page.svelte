@@ -2,7 +2,7 @@
 	import { useQuery } from '$lib/client.svelte.js';
 	import { api } from '../../../convex/_generated/api.js';
 
-	const result = useQuery(api.messages.error, {}, { async: true });
+	const result = useQuery(api.messages.error, {});
 </script>
 
 <section>
@@ -18,10 +18,10 @@
 			<button onclick={reset} data-testid="reset-btn">Retry</button>
 		{/snippet}
 
-		{@const res = await result}
+		{@const msgs = await result}
 
 		<div data-testid="query-state">
-			{#if res.data}
+			{#if msgs}
 				<p data-testid="data">Has data (unexpected)</p>
 			{:else}
 				<p data-testid="no-data">No data</p>
