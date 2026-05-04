@@ -186,3 +186,56 @@ describe('convexLoadPaginated — client-side navigation uses authenticated sing
 		expect(mockHttpClientConstructed).not.toHaveBeenCalled();
 	});
 });
+
+describe('convexLoad — skip support', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('returns a static skip result without querying', async () => {
+		const result = await convexLoad(mockRef, 'skip');
+
+		expect(result.data).toBeUndefined();
+		expect(result.isLoading).toBe(false);
+		expect(result.error).toBeUndefined();
+		expect(result.isStale).toBe(false);
+
+		// No queries should have been made
+		expect(mockSingletonQuery).not.toHaveBeenCalled();
+		expect(mockHttpClientQuery).not.toHaveBeenCalled();
+		expect(mockHttpClientConstructed).not.toHaveBeenCalled();
+	});
+
+	it('does not create a detached query subscription', async () => {
+		await convexLoad(mockRef, 'skip');
+
+		expect(createDetachedQuery).not.toHaveBeenCalled();
+	});
+});
+
+describe('convexLoadPaginated — skip support', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it('returns a static skip result without querying', async () => {
+		const result = await convexLoadPaginated(mockRef, 'skip', { initialNumItems: 10 });
+
+		expect(result.results).toEqual([]);
+		expect(result.status).toBe('Exhausted');
+		expect(result.isLoading).toBe(false);
+		expect(result.error).toBeUndefined();
+		expect(result.loadMore(10)).toBe(false);
+
+		// No queries should have been made
+		expect(mockSingletonQuery).not.toHaveBeenCalled();
+		expect(mockHttpClientQuery).not.toHaveBeenCalled();
+		expect(mockHttpClientConstructed).not.toHaveBeenCalled();
+	});
+
+	it('does not create a detached paginated query subscription', async () => {
+		await convexLoadPaginated(mockRef, 'skip', { initialNumItems: 10 });
+
+		expect(createDetachedPaginatedQuery).not.toHaveBeenCalled();
+	});
+});

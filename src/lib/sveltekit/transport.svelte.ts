@@ -67,9 +67,18 @@ export class ConvexLoadResult<T = unknown> {
  */
 export async function convexLoad<Query extends FunctionReference<'query'>>(
 	ref: Query,
-	args: FunctionArgs<Query>,
+	args: FunctionArgs<Query> | 'skip',
 	options?: { token?: string }
 ): Promise<DetachedQueryResult<Query>> {
+	if (args === 'skip') {
+		return {
+			data: undefined,
+			isLoading: false,
+			error: undefined,
+			isStale: false
+		} as DetachedQueryResult<Query>;
+	}
+
 	if (IS_BROWSER) {
 		// Client-side navigation: use the authenticated singleton ConvexClient
 		// for the initial fetch, then create a live subscription.
@@ -205,9 +214,19 @@ export class ConvexLoadPaginatedResult<T = unknown> {
  */
 export async function convexLoadPaginated<Query extends FunctionReference<'query'>>(
 	ref: Query,
-	args: WithoutPaginationOpts<FunctionArgs<Query>>,
+	args: WithoutPaginationOpts<FunctionArgs<Query>> | 'skip',
 	options: { initialNumItems: number; token?: string }
 ): Promise<DetachedPaginatedQueryResult<Query>> {
+	if (args === 'skip') {
+		return {
+			results: [],
+			status: 'Exhausted',
+			isLoading: false,
+			error: undefined,
+			loadMore: () => false
+		} as DetachedPaginatedQueryResult<Query>;
+	}
+
 	// Fetch the first page
 	const fullArgs = {
 		...args,

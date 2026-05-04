@@ -680,6 +680,28 @@ export const load = async ({ locals }) => ({
 });
 ```
 
+#### Skipping queries
+
+Pass `'skip'` as args to avoid fetching — useful for auth-gated queries that should not run when the user is unauthenticated:
+
+```ts
+// +page.server.ts — skip when unauthenticated
+export const load = async ({ locals }) => ({
+	user: await convexLoad(api.users.get, locals.token ? {} : 'skip')
+});
+```
+
+When skipped, `convexLoad` returns `{ data: undefined, isLoading: false, error: undefined, isStale: false }` without making any request. `convexLoadPaginated` returns `{ results: [], status: 'Exhausted', isLoading: false, error: undefined, loadMore: () => false }`.
+
+#### Choosing between `+page.ts` and `+page.server.ts`
+
+`convexLoad` works in both universal (`+page.ts`) and server-only (`+page.server.ts`) load functions. The difference is what happens during **client-side navigation** (after the first SSR page load):
+
+- **`+page.ts` (universal):** On client-side navigation, `convexLoad` runs in the browser and queries Convex directly — no server roundtrip. Auth is handled implicitly via the already-authenticated `ConvexClient` singleton (configured by `setupAuth()` in your root layout).
+- **`+page.server.ts` (server-only):** On client-side navigation, SvelteKit fetches from your server, which then queries Convex — adding an extra network hop. Auth is always explicit (server-side via `withServerConvexToken` or `locals.token`).
+
+Both produce identical SSR on first page load. Use `+page.ts` for best navigation performance. Use `+page.server.ts` if you need access to server-only data (e.g. `locals`, cookies) or prefer explicit auth handling.
+
 ### SSR with initialData (manual alternative)
 
 If you prefer server-only load functions (`+page.server.ts`) or need more control, you can use the `initialData` option on `useQuery()` and `usePaginatedQuery()` directly.
