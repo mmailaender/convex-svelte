@@ -1,5 +1,15 @@
 # @mmailaender/convex-svelte
 
+## 0.18.1
+
+### Patch Changes
+
+- Features:
+  - **Skip support for `convexLoad` / `convexLoadPaginated`** — pass `'skip'` as args to avoid fetching. Useful for auth-gated queries that should not run when the user is unauthenticated (e.g. `convexLoad(api.users.get, locals.token ? {} : 'skip')`).
+
+- Docs:
+  - Added guidance on choosing between `+page.ts` (universal) and `+page.server.ts` (server-only) for `convexLoad`.
+
 ## 0.18.0
 
 ### Minor Changes
