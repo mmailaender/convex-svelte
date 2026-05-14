@@ -66,26 +66,12 @@ export type UseQueryOptions<Query extends FunctionReference<'query'>> = {
 	initialData?: FunctionReturnType<Query>;
 	// Instead of loading, render result from outdated args
 	keepPreviousData?: boolean;
-	// Return a PromiseLike for use with Svelte's await and <svelte:boundary>
-	async?: boolean;
 };
 
 export type UseQueryReturn<Query extends FunctionReference<'query'>> =
 	| { data: undefined; error: undefined; isLoading: true; isStale: false }
 	| { data: undefined; error: Error; isLoading: false; isStale: boolean }
 	| { data: FunctionReturnType<Query>; error: undefined; isLoading: false; isStale: boolean };
-
-export type UseQueryAsyncResult<Query extends FunctionReference<'query'>> = {
-	readonly data: FunctionReturnType<Query> | undefined;
-	readonly isStale: boolean;
-};
-
-export interface UseQueryAsyncReturn<Query extends FunctionReference<'query'>> {
-	then<TResult1 = UseQueryAsyncResult<Query>, TResult2 = never>(
-		onfulfilled?: ((value: UseQueryAsyncResult<Query>) => TResult1 | PromiseLike<TResult1>) | null,
-		onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
-	): PromiseLike<TResult1 | TResult2>;
-}
 
 // Note that swapping out the current Convex client is not supported.
 /**
@@ -95,21 +81,11 @@ export interface UseQueryAsyncReturn<Query extends FunctionReference<'query'>> {
  * Supports React-style `"skip"` to avoid subscribing:
  *   useQuery(api.users.get, () => (isAuthed ? {} : 'skip'))
  *
- * Pass `{ async: true }` in options to return a PromiseLike that works with
- * Svelte's `await` keyword and `<svelte:boundary>` for declarative loading states.
- *
  * @param query - a FunctionReference like `api.dir1.dir2.filename.func`.
  * @param args - Arguments object / closure, or the string `"skip"` (or a closure returning it).
- * @param options - UseQueryOptions like `initialData`, `keepPreviousData`, and `async`.
- * @returns an object containing data, isLoading, error, and isStale; or a PromiseLike when async is true.
+ * @param options - UseQueryOptions like `initialData` and `keepPreviousData`.
+ * @returns an object containing data, isLoading, error, and isStale.
  */
-export function useQuery<Query extends FunctionReference<'query'>>(
-	query: Query,
-	args: FunctionArgs<Query> | 'skip' | (() => FunctionArgs<Query> | 'skip'),
-	options:
-		| (UseQueryOptions<Query> & { async: true })
-		| (() => UseQueryOptions<Query> & { async: true })
-): UseQueryAsyncReturn<Query>;
 export function useQuery<Query extends FunctionReference<'query'>>(
 	query: Query,
 	args?: FunctionArgs<Query> | 'skip' | (() => FunctionArgs<Query> | 'skip'),
@@ -119,7 +95,7 @@ export function useQuery<Query extends FunctionReference<'query'>>(
 	query: Query,
 	args: FunctionArgs<Query> | 'skip' | (() => FunctionArgs<Query> | 'skip') = {},
 	options: UseQueryOptions<Query> | (() => UseQueryOptions<Query>) = {}
-): UseQueryReturn<Query> | UseQueryAsyncReturn<Query> {
+): UseQueryReturn<Query> {
 	const client = useConvexClient();
 	if (typeof query === 'string') {
 		throw new Error('Query must be a functionReference object, not a string');
@@ -265,59 +241,6 @@ export function useQuery<Query extends FunctionReference<'query'>>(
 		if (result instanceof Error) return result;
 		return undefined;
 	});
-
-	/*
-	 ** async mode **
-	 * Returns a PromiseLike that resolves when first data arrives,
-	 * for use with Svelte's `await` and `<svelte:boundary>`.
-	 */
-	if (parseOptions(options).async) {
-		let resolvePromise!: (value: UseQueryAsyncResult<Query>) => void;
-		let rejectPromise!: (reason: Error) => void;
-		let settled = false;
-
-		const promise = new Promise<UseQueryAsyncResult<Query>>((resolve, reject) => {
-			resolvePromise = resolve;
-			rejectPromise = reject;
-		});
-
-		const asyncResult: UseQueryAsyncResult<Query> = {
-			get data() {
-				// Throw errors so <svelte:boundary> catches them as rendering errors,
-				// even after the initial promise has already resolved.
-				if (error !== undefined) throw error;
-				return data;
-			},
-			get isStale() {
-				return isSkipped ? false : isStale;
-			}
-		};
-
-		$effect(() => {
-			if (settled) return;
-			const currentData = data;
-			const currentError = error;
-			const currentIsSkipped = isSkipped;
-
-			if (currentIsSkipped) {
-				settled = true;
-				resolvePromise(asyncResult);
-			} else if (currentError !== undefined) {
-				settled = true;
-				rejectPromise(currentError);
-			} else if (currentData !== undefined) {
-				settled = true;
-				resolvePromise(asyncResult);
-			}
-		});
-
-		const thenable: UseQueryAsyncReturn<Query> = {
-			then(onfulfilled, onrejected) {
-				return promise.then(onfulfilled, onrejected);
-			}
-		};
-		return thenable;
-	}
 
 	/*
 	 ** public shape **

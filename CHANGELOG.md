@@ -86,10 +86,3 @@
 
 - Improvements:
   - Restructured README with expanded installation guide, client access patterns, SSR performance rationale, and API reference
-
-## 0.14.0
-
-### Minor Changes
-
-- Features:
-  - Add experimental async query support with Svelte boundary integration

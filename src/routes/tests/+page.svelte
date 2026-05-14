@@ -7,21 +7,6 @@
 			color: 'purple',
 			routes: [
 				{
-					title: 'Async Query',
-					path: '/tests/async-query',
-					description: 'Tests async query behavior on the client'
-				},
-				{
-					title: 'Async Query Error',
-					path: '/tests/async-query-error',
-					description: 'Tests error handling for async queries'
-				},
-				{
-					title: 'Async Query SSR',
-					path: '/tests/async-query-ssr',
-					description: 'Tests async query behavior with server-side rendering'
-				},
-				{
 					title: 'Always Errors',
 					path: '/tests/always-errors',
 					description: 'Tests error handling for queries that always throw'

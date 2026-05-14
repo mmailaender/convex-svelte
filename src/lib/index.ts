@@ -12,8 +12,6 @@ export {
 	_authContextKey,
 	type UseQueryOptions,
 	type UseQueryReturn,
-	type UseQueryAsyncResult,
-	type UseQueryAsyncReturn,
 	type FetchAccessToken,
 	type ConvexAuthProvider,
 	type SetupAuthOptions,
