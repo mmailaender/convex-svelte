@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { deferSubscription, flushDeferredSubscriptions } from '../internal/singleton.js';
 
-// We need to reset the singleton's deferred state between tests.
-// The module keeps _deferredSubscriptions as module-level state.
-// We use a dynamic import trick to reset it.
-
 // ---------------------------------------------------------------------------
 // Tests for the transport.decode → setupAuth subscription deferral mechanism.
 //
@@ -40,17 +36,12 @@ describe('queueMicrotask approach (insufficient)', () => {
 });
 
 describe('deferSubscription approach (correct)', () => {
-	// Reset the singleton module state before each test.
-	// We re-import to get fresh state.
 	let _deferSub: typeof deferSubscription;
 	let _flushSubs: typeof flushDeferredSubscriptions;
 
-	beforeEach(async () => {
-		// Dynamic re-import to reset module state
-		// Since vitest caches modules, we use resetModules
-		const { resetModules } = await import('vitest');
-		// Instead, we test using a local implementation that mirrors the singleton
-		// to avoid module caching issues. The singleton itself is tested via e2e.
+	beforeEach(() => {
+		// Use an isolated implementation that mirrors the singleton state machine.
+		// The shared singleton itself is covered by integration/e2e tests.
 		let queue: Array<() => void> | null = [];
 
 		_deferSub = (fn: () => void) => {
