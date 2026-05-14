@@ -1,4 +1,10 @@
-# @mmailaender/convex-svelte
+# convex-svelte
+
+## 0.19.0
+
+### Minor Changes
+
+- Add `'skip'` argument support to `convexLoad()` and `convexLoadPaginated()` for conditional query execution.
 
 ## 0.18.1
 

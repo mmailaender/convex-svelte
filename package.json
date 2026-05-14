@@ -19,7 +19,8 @@
 		"dev:init": "convex dev --until-success --run messages:seed",
 		"build": "vite build && pnpm package",
 		"preview": "vite preview",
-		"package": "svelte-kit sync && svelte-package && publint",
+		"package": "svelte-kit sync && svelte-package",
+		"lint:package": "pnpm package && pnpm pack --pack-destination /tmp/convex-svelte-pack && publint /tmp/convex-svelte-pack/convex-svelte-$npm_package_version.tgz",
 		"prepublishOnly": "pnpm package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -30,7 +31,7 @@
 		"test": "pnpm test:unit && pnpm test:e2e",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "changeset publish && git push --follow-tags"
+		"release": "pnpm build && changeset publish && git push --follow-tags"
 	},
 	"files": [
 		"dist",

@@ -1,8 +1,12 @@
-name: Publish Approved Pull Requests
+name: Preview Publish Approved Pull Requests
 # from https://github.com/stackblitz-labs/pkg.pr.new?tab=readme-ov-file
 on:
   pull_request_review:
     types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: read
 
 jobs:
   check:
@@ -29,14 +33,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
-      - run: npx pkg-pr-new publish
-      - run: npx pkg-pr-new publish --template '.'
+      - name: Build
+        run: pnpm build
+
+      - name: Publish package preview
+        run: pnpm dlx pkg-pr-new publish --template '.'
