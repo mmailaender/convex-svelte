@@ -198,7 +198,7 @@ export class ConvexLoadPaginatedResult<T = unknown> {
  * @example
  * ```ts
  * // +page.ts (universal load function)
- * import { convexLoadPaginated } from '@mmailaender/convex-svelte/sveltekit';
+ * import { convexLoadPaginated } from 'convex-svelte/sveltekit';
  * import { api } from '$convex/_generated/api';
  *
  * export const load = async () => ({
@@ -269,7 +269,7 @@ export async function convexLoadPaginated<Query extends FunctionReference<'query
  * import {
  *   encodeConvexLoad, decodeConvexLoad,
  *   encodeConvexLoadPaginated, decodeConvexLoadPaginated
- * } from '@mmailaender/convex-svelte/sveltekit';
+ * } from 'convex-svelte/sveltekit';
  *
  * export const transport = {
  *   ConvexLoadResult: { encode: encodeConvexLoad, decode: decodeConvexLoad },

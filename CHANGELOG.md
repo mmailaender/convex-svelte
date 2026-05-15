@@ -21,13 +21,13 @@
 ### Minor Changes
 
 - Features:
-  - **`withServerConvexToken(token, fn)`** — new server-only helper (exported from `@mmailaender/convex-svelte/sveltekit/server`) that stores the auth token in request-scoped `AsyncLocalStorage`. Wrap your SvelteKit `resolve()` call with it in `hooks.server.ts` and `convexLoad` / `createConvexHttpClient` will automatically use the token during SSR — no more `{ token: locals.token }` boilerplate in every load function.
+  - **`withServerConvexToken(token, fn)`** — new server-only helper (exported from `convex-svelte/sveltekit/server`) that stores the auth token in request-scoped `AsyncLocalStorage`. Wrap your SvelteKit `resolve()` call with it in `hooks.server.ts` and `convexLoad` / `createConvexHttpClient` will automatically use the token during SSR — no more `{ token: locals.token }` boilerplate in every load function.
 
   - **Automatic server-side token for `convexLoad` / `convexLoadPaginated`** — when no explicit `{ token }` option is provided, the server path now falls back to the token set by `withServerConvexToken`. This means `+page.ts` universal load functions can run authenticated queries during SSR without needing `+page.server.ts`.
 
   - **Automatic server-side token for `createConvexHttpClient`** — same fallback. `createConvexHttpClient()` (no args) now works in server load functions when the token context is set in the hook.
 
-  - **New export path `@mmailaender/convex-svelte/sveltekit/server`** — server-only utilities that depend on `node:async_hooks`. Currently exports `withServerConvexToken`.
+  - **New export path `convex-svelte/sveltekit/server`** — server-only utilities that depend on `node:async_hooks`. Currently exports `withServerConvexToken`.
 
 - Unchanged:
   - Explicit `{ token }` option still takes priority (fully backward compatible).

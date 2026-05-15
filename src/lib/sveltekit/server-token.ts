@@ -5,12 +5,12 @@
  * `convexLoad` and `createConvexHttpClient` to auto-read it during SSR
  * without explicit `{ token }` options.
  *
- * Import from `@mmailaender/convex-svelte/sveltekit/server`.
+ * Import from `convex-svelte/sveltekit/server`.
  *
  * @example
  * ```ts
  * // hooks.server.ts
- * import { withServerConvexToken } from '@mmailaender/convex-svelte/sveltekit/server';
+ * import { withServerConvexToken } from 'convex-svelte/sveltekit/server';
  *
  * export const handle: Handle = async ({ event, resolve }) => {
  *   const token = await getToken(event.cookies);
