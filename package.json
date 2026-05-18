@@ -100,5 +100,6 @@
 	"dependencies": {
 		"esm-env": "^1.2.2",
 		"runed": "^0.37.1"
-	}
+	},
+	"packageManager": "pnpm@11.1.2"
 }
