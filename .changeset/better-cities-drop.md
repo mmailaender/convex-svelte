@@ -27,6 +27,7 @@
 ### Improvements
 
 - Expose `UsePaginatedQuery` types and consolidate API reference table with type exports.
+- Raise peer dependency floors to `convex@^1.30.0` and `svelte@^5.19.0`. `convex-svelte` relies on Convex 1.30.0 behavior for paginated query SSR hydration, and on Svelte 5.19.0 compiler fixes for TypeScript/runes syntax.
 - Explicit `{ token }` option still takes priority (fully backward compatible). Client-side navigation still uses the authenticated singleton.
 - Restructured README with expanded installation guide, client access patterns, SSR performance rationale, and API reference.
 
