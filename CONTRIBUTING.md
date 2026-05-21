@@ -4,7 +4,7 @@ Thanks for helping improve `convex-svelte`.
 
 ## Setup
 
-Use pnpm 10.14.x, matching the GitHub Actions workflows:
+Use pnpm 11.x, matching the GitHub Actions workflows:
 
 ```bash
 corepack enable
