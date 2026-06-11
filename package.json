@@ -5,13 +5,14 @@
 		"Convex, Inc. <no-reply@convex.dev>",
 		"Micha Mailaender"
 	],
-	"version": "0.19.0",
+	"version": "0.19.1",
 	"license": "Apache-2.0",
 	"homepage": "https://github.com/mmailaender/convex-svelte",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/mmailaender/convex-svelte.git"
 	},
+	"deprecated": "This package is deprecated. Please use the 'convex-svelte' package instead: npm install convex-svelte",
 	"scripts": {
 		"dev": "concurrently --kill-others --prefix-colors blue,yellow --names 'svelte,convex' 'pnpm dev:client' 'pnpm dev:server'",
 		"dev:client": "vite dev --open",

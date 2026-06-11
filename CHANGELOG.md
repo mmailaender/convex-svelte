@@ -1,5 +1,11 @@
 # @mmailaender/convex-svelte
 
+## 0.19.1
+
+### Patch Changes
+
+- @mmailaender/convex-svelte is now deprecated. All features have been merged into convex-svelte and all future development will happen there.
+
 ## 0.18.1
 
 ### Patch Changes
