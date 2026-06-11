@@ -1,12 +1,16 @@
-> **Community Fork**: This is a community-maintained fork of the official [`convex-svelte`](https://github.com/get-convex/convex-svelte) package, published as `@mmailaender/convex-svelte`. It includes additional features like paginated queries and other community-requested improvements. This fork exists as an intermediate solution until the official package is updated.
+> **Deprecated**: `@mmailaender/convex-svelte` has been merged back into the official [`convex-svelte`](https://github.com/get-convex/convex-svelte) package. `convex-svelte@0.13.0` has the same feature set as this fork, and development now continues there under my maintenance.
+>
+> ```bash
+> npm install convex convex-svelte@0.13.0
+> ```
 
 [Convex](https://www.convex.dev/) is the typesafe backend-as-a-service with realtime updates, server functions, crons and scheduled jobs, file storage, vector search, and more.
 
 [Quickstart](https://docs.convex.dev/quickstart/svelte)
 
-# @mmailaender/convex-svelte
+# convex-svelte
 
-Receive live updates to Convex query subscriptions and call mutations and actions from Svelte with `@mmailaender/convex-svelte`.
+Receive live updates to Convex query subscriptions and call mutations and actions from Svelte with `convex-svelte`.
 
 ## Table of Contents
 
@@ -37,7 +41,7 @@ Everything in this section works in **any Svelte app** — SvelteKit, Vite + Sve
 Install the Convex client and server library:
 
 ```bash
-npm install convex @mmailaender/convex-svelte
+npm install convex convex-svelte@0.13.0
 ```
 
 Svelte doesn't like referencing code outside of `src/`, so customize the Convex functions directory. Create a `convex.json` in your project root:
@@ -63,7 +67,7 @@ Call `setupConvex()` once in a root layout component (e.g. `+layout.svelte`). Th
 ```svelte
 <!-- +layout.svelte -->
 <script lang="ts">
-	import { setupConvex } from '@mmailaender/convex-svelte';
+	import { setupConvex } from 'convex-svelte';
 	import { PUBLIC_CONVEX_URL } from '$env/static/public';
 
 	const client = setupConvex(PUBLIC_CONVEX_URL);
@@ -82,7 +86,7 @@ Use `useQuery()` to subscribe to a Convex query with automatic real-time updates
 
 ```svelte
 <script lang="ts">
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '../../convex/_generated/api.js';
 
 	const messages = useQuery(api.messages.list, () => ({ muteWords }), {
@@ -126,7 +130,7 @@ You can conditionally skip a query by returning `'skip'` from the arguments func
 
 ```svelte
 <script lang="ts">
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '../convex/_generated/api.js';
 
 	let auth = $state({ isAuthenticated: true });
@@ -153,7 +157,7 @@ Use `useMutation()` and `useAction()` to get callable functions for your Convex 
 
 ```svelte
 <script lang="ts">
-	import { useMutation } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
 	import { api } from '../../convex/_generated/api.js';
 
 	const sendMessage = useMutation(api.messages.send);
@@ -182,7 +186,7 @@ Use `useMutation()` and `useAction()` to get callable functions for your Convex 
 Actions are similar to mutations but can have side effects like calling third-party APIs:
 
 ```ts
-import { useAction } from '@mmailaender/convex-svelte';
+import { useAction } from 'convex-svelte';
 import { api } from '../../convex/_generated/api.js';
 
 const generateUploadUrl = useAction(api.files.generateUploadUrl);
@@ -195,7 +199,7 @@ Optimistic updates let you update the UI immediately when a mutation is called, 
 
 ```svelte
 <script lang="ts">
-	import { useMutation } from '@mmailaender/convex-svelte';
+	import { useMutation } from 'convex-svelte';
 	import { api } from '../../convex/_generated/api.js';
 
 	const updateUser = useMutation(api.user.update);
@@ -244,7 +248,7 @@ This is the recommended way to access the client outside of the layout where `se
 
 ```ts
 // src/lib/services/tasks.ts
-import { useMutation } from '@mmailaender/convex-svelte';
+import { useMutation } from 'convex-svelte';
 import { api } from '../convex/_generated/api.js';
 
 const createTaskMutation = useMutation(api.tasks.create);
@@ -283,7 +287,7 @@ Then call these functions from any component without plumbing the client through
 For advanced use cases like one-time queries, use `getConvexClient()` directly:
 
 ```ts
-import { getConvexClient } from '@mmailaender/convex-svelte';
+import { getConvexClient } from 'convex-svelte';
 import { api } from '../convex/_generated/api.js';
 
 // One-time query (no WebSocket subscription, just a single fetch)
@@ -301,7 +305,7 @@ For queries that return large datasets, use `usePaginatedQuery()` to load result
 
 ```svelte
 <script lang="ts">
-	import { usePaginatedQuery } from '@mmailaender/convex-svelte';
+	import { usePaginatedQuery } from 'convex-svelte';
 	import { api } from '../../convex/_generated/api.js';
 
 	const paginatedMessages = usePaginatedQuery(api.messages.listPaginated, () => ({}), {
@@ -338,7 +342,7 @@ You can also skip a paginated query by returning `'skip'` from the arguments fun
 
 ```svelte
 <script lang="ts">
-	import { usePaginatedQuery } from '@mmailaender/convex-svelte';
+	import { usePaginatedQuery } from 'convex-svelte';
 	import { api } from '../../convex/_generated/api.js';
 
 	let searchTerm = $state('');
@@ -367,7 +371,7 @@ Pass `{ async: true }` to `useQuery()` to return a `PromiseLike` that works with
 
 ```svelte
 <script lang="ts">
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '../convex/_generated/api.js';
 
 	const messages = useQuery(api.messages.list, () => ({ muteWords: [] }), { async: true });
@@ -432,7 +436,7 @@ All options (`initialData`, `keepPreviousData`, `skip`) work in both modes.
 ```svelte
 <!-- +layout.svelte -->
 <script lang="ts">
-	import { setupConvex, setupAuth } from '@mmailaender/convex-svelte';
+	import { setupConvex, setupAuth } from 'convex-svelte';
 	import { PUBLIC_CONVEX_URL } from '$env/static/public';
 
 	setupConvex(PUBLIC_CONVEX_URL);
@@ -454,7 +458,7 @@ All options (`initialData`, `keepPreviousData`, `skip`) work in both modes.
 
 ```svelte
 <script lang="ts">
-	import { useAuth, useQuery } from '@mmailaender/convex-svelte';
+	import { useAuth, useQuery } from 'convex-svelte';
 	import { api } from '../convex/_generated/api.js';
 
 	const auth = useAuth();
@@ -479,7 +483,7 @@ Pass `initialState` to seed the server render before any client-side `$effect` r
 
 ```svelte
 <script lang="ts">
-	import { setupConvex, setupAuth } from '@mmailaender/convex-svelte';
+	import { setupConvex, setupAuth } from 'convex-svelte';
 
 	let { data } = $props(); // from +layout.server.ts
 
@@ -507,7 +511,7 @@ You can also use `client.setAuth()` directly for custom integrations:
 
 ```svelte
 <script lang="ts">
-	import { useConvexClient } from '@mmailaender/convex-svelte';
+	import { useConvexClient } from 'convex-svelte';
 
 	const client = useConvexClient();
 
@@ -526,7 +530,7 @@ You can also use `client.setAuth()` directly for custom integrations:
 
 This section builds on [Svelte (Core)](#svelte-core). Make sure `setupConvex()` is in your root layout before using these features.
 
-Import from `@mmailaender/convex-svelte/sveltekit` for SvelteKit-specific features: SSR transport with live upgrade, and a server-side HTTP client helper.
+Import from `convex-svelte/sveltekit` for SvelteKit-specific features: SSR transport with live upgrade, and a server-side HTTP client helper.
 
 > **New to SSR with Convex?** See [Why SSR with Convex?](#why-ssr-with-convex) for a detailed comparison of SSR vs client-side rendering performance.
 
@@ -548,7 +552,7 @@ import {
 	decodeConvexLoad,
 	encodeConvexLoadPaginated,
 	decodeConvexLoadPaginated
-} from '@mmailaender/convex-svelte/sveltekit';
+} from 'convex-svelte/sveltekit';
 import { PUBLIC_CONVEX_URL } from '$env/static/public';
 
 initConvex(PUBLIC_CONVEX_URL);
@@ -570,7 +574,7 @@ export const transport = {
 
 ```ts
 // +page.ts (universal load function)
-import { convexLoad } from '@mmailaender/convex-svelte/sveltekit';
+import { convexLoad } from 'convex-svelte/sveltekit';
 import { api } from '$convex/_generated/api';
 
 export const load = async () => ({
@@ -606,7 +610,7 @@ The result has the same shape as `useQuery()` — `.data`, `.isLoading`, `.error
 
 ```ts
 // +page.ts (universal load function)
-import { convexLoadPaginated } from '@mmailaender/convex-svelte/sveltekit';
+import { convexLoadPaginated } from 'convex-svelte/sveltekit';
 import { api } from '$convex/_generated/api';
 
 export const load = async () => ({
@@ -650,7 +654,7 @@ For authenticated SSR fetches, use `withServerConvexToken` in your server hook. 
 ```ts
 // hooks.server.ts
 import type { Handle } from '@sveltejs/kit';
-import { withServerConvexToken } from '@mmailaender/convex-svelte/sveltekit/server';
+import { withServerConvexToken } from 'convex-svelte/sveltekit/server';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = await getAuthToken(event.cookies); // your auth provider
@@ -663,7 +667,7 @@ Then use `convexLoad` in **any** load function — `+page.ts` or `+page.server.t
 
 ```ts
 // +page.ts (universal) — works for both SSR and client-side navigation
-import { convexLoad } from '@mmailaender/convex-svelte/sveltekit';
+import { convexLoad } from 'convex-svelte/sveltekit';
 import { api } from '$convex/_generated/api';
 
 export const load = async () => ({
@@ -727,7 +731,7 @@ export const load = (async () => {
 	import type { PageData } from './$types.js';
 	let { data }: { data: PageData } = $props();
 
-	import { useQuery } from '@mmailaender/convex-svelte';
+	import { useQuery } from 'convex-svelte';
 	import { api } from '../convex/_generated/api.js';
 
 	const messages = useQuery(
@@ -746,12 +750,12 @@ Combining `initialData` with `keepPreviousData: true` (or never changing the que
 
 #### withServerConvexToken (recommended)
 
-Import from `@mmailaender/convex-svelte/sveltekit/server`. Wraps your SvelteKit `resolve()` call to store the auth token per-request via `AsyncLocalStorage`. Both `convexLoad` and `createConvexHttpClient` automatically read it during SSR.
+Import from `convex-svelte/sveltekit/server`. Wraps your SvelteKit `resolve()` call to store the auth token per-request via `AsyncLocalStorage`. Both `convexLoad` and `createConvexHttpClient` automatically read it during SSR.
 
 ```ts
 // hooks.server.ts
 import type { Handle } from '@sveltejs/kit';
-import { withServerConvexToken } from '@mmailaender/convex-svelte/sveltekit/server';
+import { withServerConvexToken } from 'convex-svelte/sveltekit/server';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = await getAuthToken(event.cookies);
@@ -795,7 +799,7 @@ For server-only code (`+page.server.ts`, form actions, API routes), use `createC
 
 ```ts
 // +page.server.ts — with withServerConvexToken (no args needed)
-import { createConvexHttpClient } from '@mmailaender/convex-svelte/sveltekit';
+import { createConvexHttpClient } from 'convex-svelte/sveltekit';
 import { api } from '$convex/_generated/api';
 
 export const load = async () => {
@@ -936,7 +940,7 @@ Note that **subsequent navigations are always client-side** regardless of your S
 
 ### `convex-svelte` exports
 
-Import from `@mmailaender/convex-svelte`:
+Import from `convex-svelte`:
 
 | Export                                    | Kind     | Description                                                                                                      |
 | ----------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -957,7 +961,7 @@ Import from `@mmailaender/convex-svelte`:
 
 ### `convex-svelte/sveltekit` exports
 
-Import from `@mmailaender/convex-svelte/sveltekit`:
+Import from `convex-svelte/sveltekit`:
 
 | Export                                      | Kind     | Description                                                                                           |
 | ------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |

@@ -12,7 +12,7 @@
 		"type": "git",
 		"url": "git+https://github.com/mmailaender/convex-svelte.git"
 	},
-	"deprecated": "This package is deprecated. Please use the 'convex-svelte' package instead: npm install convex-svelte",
+	"deprecated": "This fork has been merged back into the official convex-svelte package. Use convex-svelte@0.13.0 for the same feature set; development continues there.",
 	"scripts": {
 		"dev": "concurrently --kill-others --prefix-colors blue,yellow --names 'svelte,convex' 'pnpm dev:client' 'pnpm dev:server'",
 		"dev:client": "vite dev --open",
